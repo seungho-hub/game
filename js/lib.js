@@ -13,31 +13,34 @@ function isCollapsed(rectangle1, rectangle2) {
   return x1 + w1 >= x2 && x1 <= x2 + w2 && y1 + h1 >= y2 && y1 <= y2 + h2;
 }
 
-function determineWinner(player, enemy, timerId) {
+function end(p1, p2, timerId) {
   clearTimeout(timerId);
   const displayText = document.querySelector("#displayText");
   displayText.style.display = "flex";
 
-  if (player.health === enemy.health) {
-    displayText.innerHTML = "무승부..";
-  } else if (player.health > enemy.health) {
-    displayText.innerHTML = "킹 승리!";
+  let result;
+
+  if (p1.health === p2.health) {
+    result = "무승부..";
+  } else if (p1.health > p2.health) {
+    result = "킹 승리!";
   } else {
-    displayText.innerHTML = "마법사 승리!";
+    result = "마법사 승리!";
   }
+  displayText.innerHTML = result;
 }
 
 let timer = 60;
 let timerId;
 
-function decreaseTimer() {
+function startTimer() {
   if (timer > 0) {
-    timerId = setTimeout(decreaseTimer, 1000);
+    timerId = setTimeout(startTimer, 1000);
     timer--;
     document.querySelector("#timer").innerHTML = timer;
   }
 
   if (timer === 0) {
-    determineWinner(player, enemy, timerId);
+    end(player, enemy, timerId);
   }
 }
