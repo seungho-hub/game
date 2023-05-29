@@ -44,6 +44,7 @@ const king = new Fighter({
     width: 100,
     height: 50,
   },
+  ad: 15,
 });
 
 const wizard = new Fighter({
@@ -75,6 +76,7 @@ const wizard = new Fighter({
     width: 30,
     height: 50,
   },
+  ad: 20,
 });
 
 const keys = {
@@ -87,7 +89,11 @@ const keys = {
 startTimer();
 
 function animate() {
-  window.requestAnimationFrame(animate);
+  setTimeout(function () {
+    window.requestAnimationFrame(animate);
+
+    // 게임 로직 및 애니메이션 업데이트 코드
+  }, 9);
 
   canvas2dContext.fillStyle = "black";
   canvas2dContext.fillRect(0, 0, canvas.width, canvas.height);
@@ -139,7 +145,7 @@ function animate() {
     king.isAttacking &&
     king.framesCurrent === 4
   ) {
-    wizard.takeHit();
+    wizard.takeHit(king.ad);
     king.isAttacking = false;
 
     gsap.to("#enemyHealth", {
@@ -158,7 +164,7 @@ function animate() {
     wizard.isAttacking &&
     wizard.framesCurrent === 2
   ) {
-    king.takeHit();
+    king.takeHit(wizard.ad);
     wizard.isAttacking = false;
 
     gsap.to("#playerHealth", {

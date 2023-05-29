@@ -62,6 +62,7 @@ class Fighter extends Sprite {
     offset = { x: 0, y: 0 },
     sprites,
     attackBox = { offset: {}, width: undefined, height: undefined },
+    ad,
   }) {
     super({
       position,
@@ -94,6 +95,7 @@ class Fighter extends Sprite {
     this.dead = false;
 
     this.jumpCount = 0;
+    this.ad = ad;
 
     for (const sprite in this.sprites) {
       sprites[sprite].image = new Image();
@@ -135,8 +137,8 @@ class Fighter extends Sprite {
     this.isAttacking = true;
   }
 
-  takeHit() {
-    this.health -= 20;
+  takeHit(damage) {
+    this.health -= damage;
 
     if (this.health <= 0) {
       this.switchSprite("death");
