@@ -148,7 +148,7 @@ function animate() {
     wizard.takeHit(king.ad);
     king.isAttacking = false;
 
-    gsap.to("#enemyHealth", {
+    gsap.to("#wizardHealth", {
       width: wizard.health + "%",
     });
     ASSETS.sounds.king.attackHit.play();
@@ -167,7 +167,7 @@ function animate() {
     king.takeHit(wizard.ad);
     wizard.isAttacking = false;
 
-    gsap.to("#playerHealth", {
+    gsap.to("#kingHealth", {
       width: king.health + "%",
     });
     ASSETS.sounds.wizard.attackHit.play();

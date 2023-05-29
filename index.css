@@ -58,7 +58,7 @@ body {
   align-items: center;
   padding: 20px;
 }
-.player-health {
+.king-health {
   position: relative;
   width: 100%;
   display: flex;
@@ -69,12 +69,12 @@ body {
   border-radius: 100px 0 0 100px ;
   overflow: hidden;
 }
-.player-health-bar {
+.king-health-bar {
   background-color: red;
   height: 30px;
   width: 100%;
 }
-.player-health-progress {
+.king-health-progress {
   position: absolute;
   background: yellow;
   top: 0;
@@ -90,7 +90,7 @@ body {
   justify-content: center;
   color: white;
 }
-.enemy-health {
+.wizard-health {
   position: relative;
   width: 100%;
   border-top: 1px solid white;
@@ -99,11 +99,11 @@ body {
   border-radius: 0 100px 100px 0;
   overflow: hidden;
 }
-.enemy-health-bar {
+.wizard-health-bar {
   background-color: red;
   height: 30px;
 }
-.enemy-health-progress {
+.wizard-health-progress {
   position: absolute;
   background: yellow;
   top: 0;
