@@ -13,25 +13,15 @@ const background = new Sprite({
     x: 0,
     y: 0,
   },
-  imageSrc: "./img/background.png",
+  imageSrc: "./img/bg.gif",
 });
 
-const shop = new Sprite({
-  position: {
-    x: 600,
-    y: 128,
-  },
-  imageSrc: "./img/shop.png",
-  scale: 2.75,
-  framesMax: 6,
-});
-
-const player = new Fighter({
+const king = new Fighter({
   position: {
     x: 50,
     y: 0,
   },
-  velocity: {
+  speed: {
     x: 0,
     y: 0,
   },
@@ -42,13 +32,13 @@ const player = new Fighter({
   framesMax: 8,
   scale: 1.5,
   offset: {
-    x: 100,
+    x: 75,
     y: 25,
   },
   ...ASSETS["king"],
   attackBox: {
     offset: {
-      x: 50,
+      x: 20,
       y: 50,
     },
     width: 100,
@@ -56,12 +46,12 @@ const player = new Fighter({
   },
 });
 
-const enemy = new Fighter({
+const wizard = new Fighter({
   position: {
-    x: 870,
+    x: 925,
     y: 100,
   },
-  velocity: {
+  speed: {
     x: 0,
     y: 0,
   },
@@ -73,182 +63,165 @@ const enemy = new Fighter({
   framesMax: 4,
   scale: 1.5,
   offset: {
-    x: 100,
+    x: 155,
     y: 62,
   },
   ...ASSETS["wizard"],
   attackBox: {
     offset: {
-      x: 0,
+      x: -70,
       y: 50,
     },
-    width: 100,
+    width: 30,
     height: 50,
   },
 });
 
 const keys = {
-  a: {
-    pressed: false,
-  },
-  d: {
-    pressed: false,
-  },
-  ArrowRight: {
-    pressed: false,
-  },
-  ArrowLeft: {
-    pressed: false,
-  },
+  a: false,
+  d: false,
+  ArrowRight: false,
+  ArrowLeft: false,
 };
 
-decreaseTimer();
+startTimer();
 
 function animate() {
-  // 프레임 속도를 조절하기 위한 시간 간격 설정 (여기서는 16ms로 약 60fps)
-  setTimeout(function () {
-    window.requestAnimationFrame(animate);
-
-    // 게임 로직 및 애니메이션 업데이트 코드
-  }, 9);
+  window.requestAnimationFrame(animate);
 
   canvas2dContext.fillStyle = "black";
   canvas2dContext.fillRect(0, 0, canvas.width, canvas.height);
   background.update();
-  shop.update();
   canvas2dContext.fillStyle = "rgba(255, 255, 255, 0.15)";
   canvas2dContext.fillRect(0, 0, canvas.width, canvas.height);
-  player.update();
-  enemy.update();
+  king.update();
+  wizard.update();
 
-  player.velocity.x = 0;
-  enemy.velocity.x = 0;
+  king.speed.x = 0;
+  wizard.speed.x = 0;
 
-  // player movement
-
-  if (keys.a.pressed && player.lastKey === "a") {
-    player.velocity.x = -5;
-    player.switchSprite("run");
-  } else if (keys.d.pressed && player.lastKey === "d") {
-    player.velocity.x = 5;
-    player.switchSprite("run");
+  if (keys.a && king.lastKey === "a") {
+    king.speed.x = -5;
+    king.switchSprite("run");
+  } else if (keys.d && king.lastKey === "d") {
+    king.speed.x = 5;
+    king.switchSprite("run");
   } else {
-    player.switchSprite("idle");
+    king.switchSprite("idle");
   }
 
-  // jumping
-  if (player.velocity.y < 0) {
-    player.switchSprite("jump");
-  } else if (player.velocity.y > 0) {
-    player.switchSprite("fall");
+  if (king.speed.y < 0) {
+    ASSETS.sounds.king.jump.play();
+    king.switchSprite("jump");
+  } else if (king.speed.y > 0) {
+    king.switchSprite("fall");
   }
 
-  // Enemy movement
-  if (keys.ArrowLeft.pressed && enemy.lastKey === "ArrowLeft") {
-    enemy.velocity.x = -5;
-    enemy.switchSprite("run");
-  } else if (keys.ArrowRight.pressed && enemy.lastKey === "ArrowRight") {
-    enemy.velocity.x = 5;
-    enemy.switchSprite("run");
+  if (keys.ArrowLeft && wizard.lastKey === "ArrowLeft") {
+    wizard.speed.x = -5;
+    wizard.switchSprite("run");
+  } else if (keys.ArrowRight && wizard.lastKey === "ArrowRight") {
+    wizard.speed.x = 5;
+    wizard.switchSprite("run");
   } else {
-    enemy.switchSprite("idle");
+    wizard.switchSprite("idle");
   }
 
-  // jumping
-  if (enemy.velocity.y < 0) {
-    enemy.switchSprite("jump");
-  } else if (enemy.velocity.y > 0) {
-    enemy.switchSprite("fall");
+  if (wizard.speed.y < 0) {
+    ASSETS.sounds.wizard.jump.play();
+    wizard.switchSprite("jump");
+  } else if (wizard.speed.y > 0) {
+    wizard.switchSprite("fall");
   }
 
-  // detect for collision & enemy gets hit
   if (
-    rectangularCollision({
-      rectangle1: player,
-      rectangle2: enemy,
-    }) &&
-    player.isAttacking &&
-    player.framesCurrent === 4
+    isCollapsed(king, wizard) &&
+    king.isAttacking &&
+    king.framesCurrent === 4
   ) {
-    enemy.takeHit();
-    player.isAttacking = false;
+    wizard.takeHit();
+    king.isAttacking = false;
 
     gsap.to("#enemyHealth", {
-      width: enemy.health + "%",
+      width: wizard.health + "%",
     });
+    ASSETS.sounds.king.attackHit.play();
   }
 
-  // if player misses
-  if (player.isAttacking && player.framesCurrent === 4) {
-    player.isAttacking = false;
+  if (king.isAttacking && king.framesCurrent === 4) {
+    king.isAttacking = false;
+    ASSETS.sounds.king.attack.play();
   }
 
-  // this is where our player gets hit
   if (
-    rectangularCollision({
-      rectangle1: enemy,
-      rectangle2: player,
-    }) &&
-    enemy.isAttacking &&
-    enemy.framesCurrent === 2
+    isCollapsed(wizard, king) &&
+    wizard.isAttacking &&
+    wizard.framesCurrent === 2
   ) {
-    player.takeHit();
-    enemy.isAttacking = false;
+    king.takeHit();
+    wizard.isAttacking = false;
 
     gsap.to("#playerHealth", {
-      width: player.health + "%",
+      width: king.health + "%",
     });
+    ASSETS.sounds.wizard.attackHit.play();
   }
 
-  // if player misses
-  if (enemy.isAttacking && enemy.framesCurrent === 2) {
-    enemy.isAttacking = false;
+  if (wizard.isAttacking && wizard.framesCurrent === 2) {
+    wizard.isAttacking = false;
+    ASSETS.sounds.wizard.attack.play();
   }
 
-  // end game based on health
-  if (enemy.health <= 0 || player.health <= 0) {
-    determineWinner({ player, enemy, timerId });
+  if (wizard.health <= 0 || king.health <= 0) {
+    end(king, wizard, timerId);
   }
 }
 
 animate();
 
 window.addEventListener("keydown", (event) => {
-  if (!player.dead) {
+  if (!king.dead) {
     switch (event.key) {
       case "d":
-        keys.d.pressed = true;
-        player.lastKey = "d";
+        keys.d = true;
+        king.lastKey = "d";
         break;
       case "a":
-        keys.a.pressed = true;
-        player.lastKey = "a";
+        keys.a = true;
+        king.lastKey = "a";
         break;
       case "w":
-        player.velocity.y = -20;
+        if (king.jumpCount === 2) {
+          break;
+        }
+        king.speed.y = -15;
+        king.jumpCount++;
         break;
       case " ":
-        player.attack();
+        king.attack();
         break;
     }
   }
 
-  if (!enemy.dead) {
+  if (!wizard.dead) {
     switch (event.key) {
       case "ArrowRight":
-        keys.ArrowRight.pressed = true;
-        enemy.lastKey = "ArrowRight";
+        keys.ArrowRight = true;
+        wizard.lastKey = "ArrowRight";
         break;
       case "ArrowLeft":
-        keys.ArrowLeft.pressed = true;
-        enemy.lastKey = "ArrowLeft";
+        keys.ArrowLeft = true;
+        wizard.lastKey = "ArrowLeft";
         break;
       case "ArrowUp":
-        enemy.velocity.y = -20;
+        if (wizard.jumpCount === 2) {
+          break;
+        }
+        wizard.speed.y = -15;
+        wizard.jumpCount++;
         break;
       case "ArrowDown":
-        enemy.attack();
-
+        wizard.attack();
         break;
     }
   }
@@ -257,20 +230,16 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => {
   switch (event.key) {
     case "d":
-      keys.d.pressed = false;
+      keys.d = false;
       break;
     case "a":
-      keys.a.pressed = false;
+      keys.a = false;
       break;
-  }
-
-  // enemy keys
-  switch (event.key) {
     case "ArrowRight":
-      keys.ArrowRight.pressed = false;
+      keys.ArrowRight = false;
       break;
     case "ArrowLeft":
-      keys.ArrowLeft.pressed = false;
+      keys.ArrowLeft = false;
       break;
   }
 });
